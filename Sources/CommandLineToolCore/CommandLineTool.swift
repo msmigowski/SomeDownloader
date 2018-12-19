@@ -22,7 +22,7 @@ public final class CommandLineTool {
         print("Hello world")
 
         do {
-            try XlsxProcessor.loadSpreadsheet(path: "./example.xlsx", sheetPath: "Colors")
+            try XlsxProcessor.loadSpreadsheet(path: "./example.xlsx", sheetPath: "Colors", keysRow: 2)
         } catch {
             print(error)
         }
