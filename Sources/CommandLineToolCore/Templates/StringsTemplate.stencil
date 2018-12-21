@@ -1,0 +1,6 @@
+/*
+    Template for generating string files. Do not change anyting
+*/
+{% for term in terms %}
+    "{{ term.name }}"="{{ term.value }}";{%
+endfor %}

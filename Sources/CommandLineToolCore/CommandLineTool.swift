@@ -10,39 +10,29 @@ import CoreXLSX
 import Stencil
 
 public final class CommandLineTool {
+
     private let arguments: [String]
+    private let configFileName = "GdriveConfig.yaml"
     
     public init(arguments: [String] = CommandLine.arguments) {
         self.arguments = arguments
-        
-        
     }
     
-    public func run() throws {
-        print("Hello world")
-
+    public func run() {
         do {
-            try XlsxProcessor.loadSpreadsheet(path: "./example.xlsx", sheetPath: "Colors", keysRow: 2)
+            let gdriveConfig = try GdriveConfigLoader.loadConfig(fromPath: configFileName)
+            
+            for sheetConfig in gdriveConfig.sheets {
+                
+                let segments = try XlsxProcessor.processSpreadsheet(config: sheetConfig, filePath: gdriveConfig.file)
+                
+                let writer = try WritersFactory.makeWriter(type: sheetConfig.name)
+                try writer.write(context: segments, toPath: sheetConfig.toPath)
+                
+            }
+            
         } catch {
             print(error)
         }
-        
-//        guard let file = XLSXFile(filepath: "./example.xlsx") else {
-//            fatalError("Cannot load file") // TODO: (msm) Change it to exception raise
-//        }
-//
-//        let sharedStrings = try? file.parseSharedStrings()
-//
-//        for path in try file.parseWorksheetPaths() {
-//            let ws = try file.parseWorksheet(at: path)
-//            for row in ws.sheetData.rows {
-//                for c in row.cells {
-//                    if c.type == "s", let strIndex = c.value, let index = Int(strIndex) {
-//                        print(sharedStrings?.items[index].text )
-//                    }
-//                    print(c)
-//                }
-//            }
-//        }
     }
 }

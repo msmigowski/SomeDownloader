@@ -8,51 +8,56 @@
 import Foundation
 import CoreXLSX
 
-public typealias XlsxValue = (row: UInt, column: String, value: String?)
 
-public final class XlsxProcessor {
+typealias XlsxValue = (row: UInt, column: String, value: String?)
+
+/// - term - row name
+/// - key - column name
+/// - value - content of cell
+public typealias Segment = (term: String, key: String?, value: String)
+//typealias Segment = (terms: [XlsxValue], key: [XlsxValue]?, values: XlsxValue)
+
+public final class XlsxProcessor: Processable {    
     
     public enum XlsxProcessorErrors: Error {
         case xlsxFileNotInitialized
         case emptySharedStrings
         case wrongReferenceStringId
         case emptyData
+        case noSuchSheetName
     }
     
-    private static var sharedString: SharedStrings?
-    
-    private static var terms = [XlsxValue]()
-    private static var keys = [XlsxValue]()
-    private static var content = [XlsxValue]()
-    
-    // TODO: (msm) Change default walues
-    static internal func loadSpreadsheet(path: String, sheetPath: String, keysRow: Int, termColumn: String = "B", keysFrom: String = "C", keysTo: String = "C") throws {
+//    static func processSpreadsheet(config: Config, filePath path: String) throws -> [Segment] {
+    static func processSpreadsheet(config: Config, filePath path: String) throws -> [Segment] {
         guard let xlsxFile = XLSXFile(filepath: path) else {
             throw XlsxProcessorErrors.xlsxFileNotInitialized
         }
         
-        sharedString = try xlsxFile.parseSharedStrings()
-//        let paths = try xlsxFile.parseWorksheetPaths()s
-        let worksheet = try xlsxFile.parseWorksheet(at: "xl/worksheets/sheet1.xml") // TODO: (msm) Problem with sheets name
+        var terms = [XlsxValue]()
+        var keys = [XlsxValue]()
+        var content = [XlsxValue]()
         
+        let sharedStrings = try xlsxFile.parseSharedStrings()
+        let worksheet = try getSheet(withName: config.name, spreadsheet: xlsxFile)
+
         guard let rows = worksheet.data?.rows else {
             throw XlsxProcessorErrors.emptyData
         }
         
         // This implementation needs to be disscused, maybe there is
         // better solution to structurize model (terms, keys, content)
-        for row in rows {
+        for row in rows where row.reference >= config.keysRow {
             
             for cell in row.cells {
                 
                 let column = cell.reference.column.value
-                let convertedCell = try convert(cell)
+                let convertedCell = try convert(cell, withSharedStrings: sharedStrings)
                 
                 switch column {
-                case termColumn:
+                case config.termColumn:
                     terms.append( (row.reference, column, convertedCell) )
-                case keysFrom...keysTo:
-                    if row.reference == keysRow {
+                case config.fromColumn...config.toColumn:
+                    if row.reference == config.keysRow {
                         keys.append( (row.reference, column, convertedCell) )
                     } else {
                         content.append( (row.reference, column, convertedCell) )
@@ -65,30 +70,52 @@ public final class XlsxProcessor {
             
         }
         
-        
+        return concise(keys: keys, content: content, andTerms: terms)
     }
     
-    static private func concise(keys: [XlsxValue], andContent content: [XlsxValue]) {
-        var dict = [String: [XlsxValue]]()
+//    static private func concise(keys: [XlsxValue], content: [XlsxValue], andTerms terms: [XlsxValue]) -> [Segment] {
+    static private func concise(keys: [XlsxValue], content: [XlsxValue], andTerms terms: [XlsxValue]) -> [Segment] {
+        var segments = [Segment]()
         
-        for key in keys {
-            guard let keyValue = key.value else { continue }
-            
-            dict[keyValue] = [XlsxValue]()
+        // TODO: (msm) Maybe too many calculations
+        for term in terms {
+            for key in keys {
+                let cell = content.first(where: { $0.column == key.column && $0.row == term.row })
+                
+                guard let contentValue = cell?.value, let termValue = term.value else { continue }
+                
+                segments.append(( termValue, key.value, contentValue ))
+            }
         }
+        
+        return segments
     }
     
-    static private func convert(_ cell: Cell) throws -> String? {
+    static private func convert(_ cell: Cell, withSharedStrings sharedStrings: SharedStrings) throws -> String? {
         guard cell.type == "s" else {
             return cell.value
         }
         guard let stringIndex = cell.value, let index = Int(stringIndex) else {
             throw XlsxProcessorErrors.wrongReferenceStringId
         }
-        guard let sharedString = sharedString else {
-            throw XlsxProcessorErrors.emptySharedStrings
+        
+        return sharedStrings.items[index].text
+    }
+    
+    static private func getSheet(withName name: String, spreadsheet: XLSXFile) throws -> Worksheet {
+        if name == "Plurals" {
+            print(name)
+        }
+        guard let relationshipId = try spreadsheet.parseWorkbooks().first?.sheets.items.first(where: { $0.name == name })?.relationship else {
+            throw XlsxProcessorErrors.noSuchSheetName
+        }
+        guard let target = try spreadsheet.parseDocumentRelationships().first?.1.items.first(where: { $0.id == relationshipId })?.target else {
+            throw XlsxProcessorErrors.noSuchSheetName
+        }
+        guard let path = try spreadsheet.parseWorksheetPaths().first(where: { $0.contains(target) }) else {
+            throw XlsxProcessorErrors.noSuchSheetName
         }
         
-        return sharedString.items[index].text
+        return try spreadsheet.parseWorksheet(at: path)
     }
 }

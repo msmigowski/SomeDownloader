@@ -1,0 +1,20 @@
+
+# Choose operation system (ios, android)
+platform: ios
+
+# Write sheet names, which you want to parse (Colors, Localizations ...)
+sheet: 
+  - Colors: 
+      keys_row: 2
+      term_column: B
+      from_column: F
+      to_column: F
+
+  - Localizations:
+      keys_row: 2
+      term_column: B
+      from_column: C
+      to_column: D
+
+
+
