@@ -103,9 +103,6 @@ public final class XlsxProcessor: Processable {
     }
     
     static private func getSheet(withName name: String, spreadsheet: XLSXFile) throws -> Worksheet {
-        if name == "Plurals" {
-            print(name)
-        }
         guard let relationshipId = try spreadsheet.parseWorkbooks().first?.sheets.items.first(where: { $0.name == name })?.relationship else {
             throw XlsxProcessorErrors.noSuchSheetName
         }

@@ -7,8 +7,8 @@ let package = Package(
     name: "CommandLineTool",
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/MaxDesiatov/CoreXLSX.git",
-                 .branch("master")),
+        .package(url: "https://github.com/msmigowski/CoreXLSX.git",
+                 .branch("feature/reseting_codables")),
         .package(url: "https://github.com/stencilproject/Stencil.git",
                  .upToNextMajor(from: "0.3.1")),
         .package(url: "https://github.com/jpsim/Yams.git",
