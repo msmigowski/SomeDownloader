@@ -14,10 +14,10 @@ typealias XlsxValue = (row: UInt, column: String, value: String?)
 /// - term - row name
 /// - key - column name
 /// - value - content of cell
-public typealias Segment = (term: String, key: String?, value: String)
-//typealias Segment = (terms: [XlsxValue], key: [XlsxValue]?, values: XlsxValue)
+//public typealias Segment = (term: String, key: String?, value: String)
+typealias Segment = (terms: [XlsxValue], keys: [XlsxValue?], values: [XlsxValue])
 
-public final class XlsxProcessor: Processable {    
+public final class XlsxProcessor: Processable {
     
     public enum XlsxProcessorErrors: Error {
         case xlsxFileNotInitialized
@@ -28,7 +28,7 @@ public final class XlsxProcessor: Processable {
     }
     
 //    static func processSpreadsheet(config: Config, filePath path: String) throws -> [Segment] {
-    static func processSpreadsheet(config: Config, filePath path: String) throws -> [Segment] {
+    static func processSpreadsheet(config: Config, filePath path: String) throws -> Segment {
         guard let xlsxFile = XLSXFile(filepath: path) else {
             throw XlsxProcessorErrors.xlsxFileNotInitialized
         }
@@ -70,25 +70,7 @@ public final class XlsxProcessor: Processable {
             
         }
         
-        return concise(keys: keys, content: content, andTerms: terms)
-    }
-    
-//    static private func concise(keys: [XlsxValue], content: [XlsxValue], andTerms terms: [XlsxValue]) -> [Segment] {
-    static private func concise(keys: [XlsxValue], content: [XlsxValue], andTerms terms: [XlsxValue]) -> [Segment] {
-        var segments = [Segment]()
-        
-        // TODO: (msm) Maybe too many calculations
-        for term in terms {
-            for key in keys {
-                let cell = content.first(where: { $0.column == key.column && $0.row == term.row })
-                
-                guard let contentValue = cell?.value, let termValue = term.value else { continue }
-                
-                segments.append(( termValue, key.value, contentValue ))
-            }
-        }
-        
-        return segments
+        return (terms, keys, content)
     }
     
     static private func convert(_ cell: Cell, withSharedStrings sharedStrings: SharedStrings) throws -> String? {

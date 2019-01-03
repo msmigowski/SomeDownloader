@@ -12,7 +12,7 @@ final class TrackingWriter: Writable {
     let templateName = "StringsTemplate.stencil"
     let outputFileName = "Tracking.string"
     
-    func write(context: [Segment], toPath path: String) throws {
+    func write(context: Segment, toPath path: String) throws {
         
         let fileHandle = try getWritableFile(name: outputFileName, atPath: path)
         let preparedContext = prepare(context: context)

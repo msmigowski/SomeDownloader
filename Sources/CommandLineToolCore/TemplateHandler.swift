@@ -9,7 +9,7 @@ import Foundation
 import Stencil
 import PathKit
 
-typealias Terms = [String: [TemplateHandler.Term]]
+//typealias Terms = [String: [TemplateHandler.Term]]
 
 public final class TemplateHandler {
     
@@ -23,7 +23,7 @@ public final class TemplateHandler {
         case bundleDoesNotExist
     }
     
-    static func render(context: Terms, withTemplateType name: String) throws -> String {
+    static func render<Terms>(context: Terms, withTemplateType name: String) throws -> String {
         guard let resourcePath = Bundle(for: TemplateHandler.self).resourcePath else {
             throw TemplateHandlerError.bundleDoesNotExist
         }
@@ -31,6 +31,6 @@ public final class TemplateHandler {
         let path = Path(resourcePath)
         let enviroment = Environment(loader: FileSystemLoader(paths: [path]))
         
-        return try enviroment.renderTemplate(name: name, context: context)
+        return try enviroment.renderTemplate(name: name, context: ["terms": context])
     }
 }

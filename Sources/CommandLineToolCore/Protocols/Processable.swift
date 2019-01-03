@@ -10,5 +10,5 @@ import Foundation
 protocol Processable {
     associatedtype ReturnType
     
-    static func processSpreadsheet(config: Config, filePath path: String) throws -> [ReturnType]
+    static func processSpreadsheet(config: Config, filePath path: String) throws -> ReturnType
 }

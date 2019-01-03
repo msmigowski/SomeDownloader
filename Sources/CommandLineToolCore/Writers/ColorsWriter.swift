@@ -12,7 +12,7 @@ public final class ColorsWriter: Writable {
     let templateName: String = "ColorsTemplate.stencil"
     let outputFileName: String = "Colors.xml"
     
-    func write(context: [Segment], toPath path: String) throws {
+    func write(context: Segment, toPath path: String) throws {
         
         let fileHandle = try getWritableFile(name: outputFileName, atPath: path)
         let preparedContext = prepare(context: context)
