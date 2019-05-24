@@ -43,6 +43,7 @@ final class PluralsWriter: Writable {
         
     }
     
+    // TODO: (msm) This class is very bad it should be rewritten 
     func prepare(context: Segment, forKey key: String? = nil) throws -> [String] {
         guard let key = key else {
             throw PluralsWriterError.keyNotExist
@@ -73,6 +74,7 @@ final class PluralsWriter: Writable {
         return ["as"]
     }
     
+    @discardableResult
     private func process(currentValue: inout XlsxValue, keysColumn: String, valuesColumn: String, context: Segment) throws -> [String: Any] {
         
         var result = [String: Any]()
