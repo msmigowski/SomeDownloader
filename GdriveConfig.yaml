@@ -2,19 +2,50 @@
 # Choose operation system (ios, android)
 platform: ios
 
+# xlsx file name
+file: ./AppResourcesTest.xlsx
+
 # Write sheet names, which you want to parse (Colors, Localizations ...)
-sheet: 
-  - Colors: 
-      keys_row: 2
-      term_column: B
-      from_column: F
-      to_column: F
+sheets: 
 
-  - Localizations:
-      keys_row: 2
-      term_column: B
-      from_column: C
-      to_column: D
+  - name: Colors
+    keys_row: 2
+    term_column: B
+    from_column: F
+    to_column: F
+    to_path: ./
 
+  - name: Localizations
+    keys_row: 2
+    term_column: B
+    from_column: C
+    to_column: D
+    to_path: ./
 
+  - name: NonLocalizations
+    keys_row: 2
+    term_column: B
+    from_column: C
+    to_column: C
+    to_path: ./
 
+  - name: Permissions
+    keys_row: 2
+    term_column: C
+    from_column: D
+    to_column: E
+    to_path: ./
+
+  - name: Tracking
+    keys_row: 2
+    term_column: B
+    from_column: C
+    to_column: C
+    to_path: ./
+
+  - name: Plurals
+    keys_row: 2
+    term_column: B
+    from_column: C
+    to_column: H
+    to_path: ./
